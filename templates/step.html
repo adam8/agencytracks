@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <h1>{{ step.order }}. {{ step.step_name }}</h1>
+  
+  <ul class="admin-list">
+    {% for task in tasks %}
+      <li>{{ task.task_text }} <a href="/clients/{{ task.client_abbreviation }}">({{ task.client_abbreviation }})</a></li>
+    {% endfor %}
+    
+    <li>
+      <button class="toggle-next pure-button">Add New Task</button>
+      <form class="toggle-this pure-form" action="/steps/task/new" method="post">
+        <input type="text" name="task_text" placeholder="task" required>
+        <input type="hidden" name="step_name" value="{{ step.key.id() }}">
+        <button class="pure-button">Create Task</button>
+      </form>
+    </li>
+    
+  </ul>
+  
+  
+  
+{% endblock %}

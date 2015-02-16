@@ -1,0 +1,201 @@
+<ul id="task-list-{{ step.key.id() }}">
+  {% for task in tasks %}
+
+    <li class="pure-g task-list-item task-list-step-{{ step.key.id() }}{%if task.indent %} indent{% endif %} {{ loop.cycle('row-odd', 'row-even') }}" data-client="{{ client.key.id() }}" data-task="{{ task.key.id() }}" data-order="{{ task.order }}" data-text="{{ task.task_text }}">
+      
+        <div class="pure-u pure-u-md-3-5">   
+          <input {% if task.done %}checked {% endif %}type="checkbox" name="done" value="True" data-client="{{ client.key.id() }}" data-task="{{ task.key.id() }}"> 
+          <!--<input class="task-text" type="text" data-client="{{ client.key.id() }}" data-task="{{ task.key.id() }}" value="{{ task.task_text }} ">-->
+          <span class="task-text" contenteditable="true" data-client="{{ client.key.id() }}" data-task="{{ task.key.id() }}" data-original="{{ task.task_text }}">{{ task.task_text|safe }}</span>
+        </div>
+        
+        <div class="pure-u pure-u-md-2-5">
+          <span class="time-tracker">
+            <input class="task-order" name="task-order" placeholder="{{ task.order|default("0", True) }}" data-client="{{ client.key.id() }}" data-task="{{ task.key.id() }}" type="text"> 
+            {% if task.task_type != 'reminder' %}
+            <input class="time-estimate" type="text" placeholder="{{ task.time_estimate|default("", True) }}" data-client="{{ client.key.id() }}" data-task="{{ task.key.id() }}">
+            <input class="time-actual {% if task.time_actual > task.time_estimate %}time-over-estimate{% endif %}" type="text" data-client="{{ client.key.id() }}" data-task="{{ task.key.id() }}" value="{{ task.time_actual|default("", True) }}"> 
+            {% endif %}
+          </span>
+          <span class="task-actions nowrap"><select class="task-type" name="task_type" data-client="{{ client.key.id() }}" data-task="{{ task.key.id() }}"><option value="task"{% if task.task_type=='task'%} selected{% endif %}>Task</option><option value="reminder"{% if task.task_type=='reminder'%} selected{% endif %}>Reminder</option></select><span class="task-reorder">&#8597;</span><span class="task-indent {% if task.indent %}task-open{% endif %}" data-client="{{ client.key.id() }}" data-task="{{ task.key.id() }}">{% if task.indent %}&#11013;{% else %}&#10140;{% endif %}</span><form class="delete-task-form" action="/clients/{{ client.key.id() }}/tasks/delete/{{ task.key.id() }}" method="post"><input type="hidden" name="victim" value="{{ task.key.id() }}"><input type="hidden" name="client" value="{{ client.key.id() }}"><input type="hidden" name="step" value="{{ step.key.id() }}"><button class="delete-task">x</button></form></span>
+        </div>
+
+    </li>
+
+  {% endfor %}
+</ul>
+
+<div class="pure-g">
+  <div class="pure-u pure-u-md-3-5"></div>
+  <div class="pure-u pure-u-md-2-5 step-time-totals">
+    <div id="step-{{ step.key.id() }}-estimate-total" class="estimate-total"></div>
+    <div id="step-{{ step.key.id() }}-actual-total" class="actual-total"></div>
+  </div>
+</div>
+
+  
+
+  
+
+<button class="toggle-next pure-button add-new">Add Task</button>
+<form class="toggle-this pure-form task-form-add" action="/steps/task/new" method="post">
+  <input type="text" class="task-text-new" name="task_text" placeholder="task" required>
+  <input type="number" name="task_estimate" style="width:100px;" placeholder="estimate" required>
+  <select name="task_type">
+    <option value="task" selected>Task</option>
+    <option value="reminder">Reminder</option>
+  </select>
+  <input type="hidden" name="step_name" value="{{ step.key.id() }}">
+  <input type="hidden" name="client" value="{{ client.key.id() }}">
+  <input type="hidden" name="order" value="" id="order-{{ step.key.id() }}">
+  <button class="pure-button">Create Task</button>
+</form>
+
+<script>
+  $(function() {
+    
+    $('.task-text').keypress(function(e) {
+      //console.log('hola',e.which);
+      if (e.which==13) {
+        // prevent enter key from creating new line in task 
+        e.preventDefault();
+        $(this).blur();
+      }
+    });
+
+    Array.max = function( array ){
+      return Math.max.apply( Math, array );
+    };
+    
+    var order_numbers = $('.task-list-step-{{ step.key.id() }} .task-order').map(function() {
+      if(!isNaN ( parseFloat ( $(this).attr('placeholder') ) ) ) {
+        return $(this).attr('placeholder');
+      }
+    }).get();
+
+    var order_num_max = Array.max(order_numbers);
+    
+    // Total of Estimated Time
+    
+    if (!isNaN(parseFloat(order_num_max)) && isFinite(order_num_max)) {
+      $('#order-{{ step.key.id() }}').val( order_num_max+1.0 );
+    } else {
+      $('#order-{{ step.key.id() }}').val( 1.0 );
+    }
+    
+    var estimate_mins = 0;
+    $('.task-list-step-{{ step.key.id() }} .time-estimate').each(function() {
+      if(!isNaN ( parseFloat ( $(this).attr('placeholder') ) ) ) {
+        estimate_mins += parseFloat ($(this).attr('placeholder'));
+      }
+    });
+    if (estimate_mins > 0) {
+      var estimate_hours = Math.ceil(estimate_mins/60);
+      if (estimate_hours > 6) {
+        // estimate_days = Math.ceil( (estimate_hours / 7) * 10) / 10;
+        var estimate_days = Math.floor( estimate_hours / 7);
+        var estimate_remainder_hours = estimate_hours % 7;
+        $('#step-{{ step.key.id() }}-estimate-total').html(estimate_days + "d");
+        if (estimate_remainder_hours > 0) {
+          $('#step-{{ step.key.id() }}-estimate-total').append(" " + estimate_remainder_hours + "h");
+        }
+      } else {
+        $('#step-{{ step.key.id() }}-estimate-total').html(estimate_hours + "h");
+      }
+    }
+    
+    // Total of Actual Time
+    
+    var actual_mins = 0;
+    $('.task-list-step-{{ step.key.id() }} .time-actual').each(function() {
+      if(!isNaN ( parseFloat ( $(this).val() ) ) ) {
+        actual_mins += parseFloat ( $(this).val() );
+      }
+    });
+    
+    if (actual_mins > 0) {
+      var actual_hours = Math.ceil(actual_mins/60);
+      if (actual_hours > 6) {
+        var actual_days = Math.floor( actual_hours / 7);
+        var actual_remainder_hours = actual_hours % 7;
+        $('#step-{{ step.key.id() }}-actual-total').html(actual_days + "d");
+        if (actual_remainder_hours > 0) {
+          $('#step-{{ step.key.id() }}-actual-total').append("&nbsp;" + actual_remainder_hours + "h");
+        }
+      } else {
+        $('#step-{{ step.key.id() }}-actual-total').html(actual_hours + "h");
+      }
+    }
+    
+    if (actual_mins > estimate_mins) {
+      $('#step-{{ step.key.id() }}-actual-total').addClass('time-total-over-estimate');
+    }
+    
+    
+    
+    // Drag to re-order steps
+
+    $('#task-list-{{ step.key.id() }}').sortable({ 
+  		distance: 10,
+      nested: false,
+      handle: '.task-reorder',
+      onDragStart: function ($item, container, _super) {
+        /*
+        pic_pop_num = $item.index();
+        var offset = $item.offset(),
+        pointer = container.rootGroup.pointer
+        adjustment = {
+          left: pointer.left - offset.left,
+          top: pointer.top - offset.top
+        }
+        _super($item, container)
+        */
+      },
+      onDrag: function ($item, position) {
+        /*
+        $item.css({
+          left: position.left - adjustment.left,
+          top: position.top - adjustment.top
+        })
+        */
+      },
+      onDrop: function (item, container, _super) {
+        $('#task-list-{{ step.key.id() }}').sortable("disable");
+        var out = [];
+        function processOneLi(node) {    
+          var retVal = {
+            "id": node.data('task'),
+            "order": node.index()
+          };
+          return retVal;
+        }
+        $('#task-list-{{ step.key.id() }}').children("li").each(function() {
+            out.push(processOneLi($(this)));
+        });
+        var orderJSON = JSON.stringify(out);
+        $('#task-list-{{ step.key.id() }}').addClass('tasks-updating');
+        $.post( "/clients/" + item.data('client') + "/tasks/order", {"order": orderJSON}).done(function(data) {
+          console.log(data);
+          $('#task-list-{{ step.key.id() }}').sortable("enable");
+          $('#task-list-{{ step.key.id() }}').removeClass('tasks-updating');
+        });
+        //container.el.removeClass("active");
+        //_super(item);
+      },
+      afterMove: function (placeholder, container) {
+        /*
+        if(oldPicContainer != container){
+          if(oldPicContainer)
+            oldPicContainer.el.removeClass("active")
+          container.el.addClass("active")
+          oldPicContainer = container
+        }
+        */
+      }
+  	});
+    
+  });
+</script>
+
+  
+  

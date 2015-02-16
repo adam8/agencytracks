@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <h1>{{ client.client_name }} Developer Dashboard</h2>
+
+  <div id="steps" class="project-block">
+    
+    <div id="step-questionnaire">
+
+        <h1 class="questionnaire-title trigger-next"><span class="project-block-counter">1</span>Questionnaire</h1>
+  
+        <form id="questionnaire-form" action="/clients/{{ client.key.id() }}/questionnaire" method="post" class="pure-form pure-form-stacked form-questions step-tasks toggle-this" data-client="{{ client.key.id() }}">
+    
+          <!--
+          <div id="show-submit-key-container">
+            <a href="#">Have a key to restore a previous session?</a>
+          </div>
+          <input type="text" placeholder="Please enter key">
+          <button id="submit-key" class="pure-button pure-button-primary">Submit Key</button>
+          -->
+    
+          <fieldset>
+            <div class="pure-control-group">
+              <label class="question"><label>{{ question_success.question|default("", True) }}</label></label>
+              <textarea name="question_success" id="success" class="pure-input-2-3">{{ question_success.answer|default("", True) }}</textarea>
+            </div>
+            <div class="pure-control-group">
+              <label class="question">{{ question_domain.question|default("", True) }}</label>
+              <input name="question_domain" id="url" class="pure-input-2-3" type="text" value="{{ question_domain.answer|default("", True) }}" placeholder="If so, please put it here">
+            </div>
+            <div class="pure-control-group">
+              <label class="question">{{ question_goals.question|default("", True) }}</label>
+              <div><input name="question_goal1" type="text" class="pure-input-2-3" style="display: inline-block" placeholder="1. Increased Sales (example)" value="{{ question_goal1.answer|default("", True) }}"></div>
+              <div><input name="question_goal2" type="text" class="pure-input-2-3" style="display: inline-block" placeholder="2. Sign up for trial account (example)" value="{{ question_goal2.answer|default("", True) }}"></div>
+              <div><input name="question_goal3" type="text" class="pure-input-2-3" style="display: inline-block" placeholder="3. Awareness (example)" value="{{ question_goal3.answer|default("", True) }}"></div>
+            </div>
+            <div class="pure-control-group">
+              <label class="question">{{ question_target_audience.question|default("", True) }}</label>
+              <textarea name="question_target_audience" class="pure-input-2-3">{{ question_target_audience.answer|default("", True) }}</textarea>
+            </div>
+            <div class="pure-control-group">
+              <label class="question">{{ question_brand.question|default("", True) }}</label>
+              <textarea name="question_brand" class="pure-input-2-3">{{ question_brand.answer|default("", True) }}</textarea>
+            </div>
+
+            <div class="pure-control-group">
+              <label class="question">{{ question_competitive_advantage.question|default("", True) }}</label>
+              <textarea name="question_competitive_advantage" class="pure-input-2-3" placeholder="If so, please provide a description">{{ question_competitive_advantage.answer|default("", True) }}</textarea>
+            </div>
+            <div class="pure-control-group">
+              <label class="question">{{ question_envy.question|default("", True) }}</label>
+              <div><input value="{{ question_envy1.answer|default("", True) }}" name="question_envy1" class="pure-input-2-3" type="url" style="display: inline-block"></div>
+              <div><input value="{{ question_envy2.answer|default("", True) }}" name="question_envy2" class="pure-input-2-3" type="url" style="display: inline-block"></div>
+              <div><input value="{{ question_envy3.answer|default("", True) }}" name="question_envy3" class="pure-input-2-3" type="url" style="display: inline-block"></div>
+            </div>
+            <div class="pure-control-group">
+              <label class="question">{{ question_envy_details.question|default("", True) }}</label>
+              <textarea name="question_envy_details" class="pure-input-2-3">{{ question_envy_details.answer|default("", True) }}</textarea>
+            </div>
+            <div class="pure-control-group">
+              <label class="question">{{ question_competitors.question|default("", True) }}</label>
+              <div><input value="{{ question_competitor1.answer|default("", True) }}" name="question_competitor1" class="pure-input-2-3" type="url" style="display: inline-block"></div>
+              <div><input value="{{ question_competitor2.answer|default("", True) }}" name="question_competitor2" class="pure-input-2-3" type="url" style="display: inline-block"></div>
+              <div><input value="{{ question_competitor3.answer|default("", True) }}" name="question_competitor3" class="pure-input-2-3" type="url" style="display: inline-block"></div>
+            </div>
+            <div class="pure-control-group">
+              <label class="question">{{ question_competitor_details.question|default("", True) }}</label>
+              <textarea name="question_competitor_details" class="pure-input-2-3">{{ question_competitor_details.answer|default("", True) }}</textarea>
+            </div>
+            <div class="pure-control-group">
+              <label class="question">{{ question_marketing.question|default("", True) }}</label>
+              <textarea name="question_marketing" class="pure-input-2-3" placeholder="If so, please indicate here">{{ question_marketing.answer|default("", True) }}</textarea>
+            </div>
+            <div class="pure-control-group">
+              <label class="question">{{ question_budget_timeframe.question|default("", True) }}</label>
+              <textarea name="question_budget_timeframe" class="pure-input-2-3" placeholder="If so, please indicate here">{{ question_budget_timeframe.answer|default("", True) }}</textarea>
+            </div>
+            <div class="pure-control-group">
+              <label class="question">{{ question_additional_info.question|default("", True) }}</label>
+              <textarea name="question_additional_info" class="pure-input-2-3">{{ question_additional_info.answer|default("", True) }}</textarea>
+            </div>
+            <div class="pure-control-group">
+              <label class="question">{{ question_name.question|default("", True) }}</label>
+              <input value="{{ question_name.answer|default("", True) }}" name="question_name" type="text">
+            </div>
+            <div class="pure-control-group">
+              <label class="question">{{ question_email.question|default("", True) }}</label>
+              <input value="{{ question_email.answer|default("", True) }}" name="question_email" type="email">
+            </div>
+            <div class="pure-control-group">
+              <label class="question">{{ question_phone.question|default("", True) }}</label>
+              <input value="{{ question_phone.answer|default("", True) }}" name="question_phone" type="tel">
+            </div>
+    
+            <button id="submit-questionnaire" class="pure-button pure-button-primary project-block-submit">Submit Questionnaire</button>
+          </fieldset>
+        </form>
+        
+    </div>
+    
+    {% for step in steps %}
+    
+      {% if step.key.id() != 'questionnaire' %}
+    
+        <div id="step-{{ step.key.id() }}" class="step-block">
+          
+          <h1 class="step-title-trigger" data-step="{{ step.key.id() }}" data-client="{{ client.key.id() }}"{% if step_open == step.key.id() %} class="step-open"{% endif %}>
+            <span class="project-block-counter">{{ step.order}}</span> 
+            {{ step.step_name }} 
+            <span class="project-block-estimate"></span>
+          </h1>
+          <div class="step-tasks"></div>
+
+        </div>
+      
+      {% endif %}
+      
+    {% endfor %}    
+    
+  </div>
+  
+  
+  <div>
+    <h1 id="notes-level-toggle" class="trigger-next">Notes</h1>
+    
+    <div id="widget-notes" class="widget-notes-client widget-item toggle-this" data-client="{{ client.key.id() }}" data-user="lvl"></div>
+    
+    <!--
+    <form class="pure-form pure-form-stacked toggle-this" action="/clients/{{ client.key.id() }}/notes" method="post">
+      {% for note in notes %}
+      <div class='note-entry'>{{ note.text }} <span class="note-date">{{ note.updated.strftime('%-d %b %Y') }}</span></div>
+      {% endfor %}
+      <textarea name="leveller_note" class="notes pure-input-2-3" placeholder="Add note"></textarea>
+      <button type="submit" class="pure-button">Save notes</button>
+    </form>
+    -->
+    
+  </div>
+  
+  
+  <div class="project-block-meta">
+
+    <h1 class="meta trigger-next">Meta <span class="project-block-estimate"></span></h1>
+
+    <div class="toggle-this">
+      
+      <h3>Client Management</h3>
+      
+      <ul> 
+         <li>Note all changes done (share checklist)</li>
+         <li>Answer questions, etc</li>
+         <li>Note expectations for upcoming month</li>
+         <li>Schedule</li>
+         <li>Get final approval</li>
+      </ul>
+  
+      <h3>Strategy</h3>
+    
+      <ul>
+         <li>One person takes responsibility for account</li>
+         <li>Another person tracks project, timelines, code review, QA, etc</li>
+         <li>Very close communication with client
+          <ul class="indent-group">
+            <li>Direct Contact via Phone, Skype, Screensharing, GoToMeeting or Google Hangouts</li>
+            <li>Ongoing maintenance and iterations. </li>
+            <li>Show early and often.</li>
+            <li>Be very, very, very clear about expectations. Over communicate.</li>
+            <li>Digital Services Dashboard (links to their Cloud Services).</li>
+            <li>Quick issue tracking system (aka Trello)</li>
+          </ul>
+        </li>
+      </ul>
+    
+    </div>
+
+  </div>
+
+  
+  
+{% endblock %}

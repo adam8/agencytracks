@@ -1,0 +1,29 @@
+<div>
+  
+  <h2>Text Chat</h2>
+  
+  <div class="note-create-form-client">
+    <div class="note-entry author-{{ author }} test123">
+      <div class="note-create-form-client-input note-muted" contenteditable="true" data-default-message="Type your message">Type your message</div>
+    </div>
+  </div>
+  
+  <div class="widget-text">
+    {% if notes %}
+      {% for note in notes %}
+        <div class='note-entry author-{{ note.author }}'>
+          <div class="balance-text">{{ note.text|safe }}</div>
+          <div class="note-meta">
+            <div><a href="mailto:{{ note.user }}">{{ note.nickname }}</a></div>
+            <div>{{ note.updated.strftime('%-d %b %Y') }}</div>
+          </div>
+        </div>
+      {% endfor %}
+      <div class="note-entry-more"><a href="#">Older messages</a></div>
+    {% else %}
+      <div class="no-disussion-yet">There is no discussion here yet.</div>
+    {% endif %}
+  </div>
+  
+</div>
+

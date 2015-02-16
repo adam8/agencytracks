@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="/js/redactor/redactor.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css">
+<style type="text/css">
+  .redactor-container { width: 66.666%; }
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+  <h1>{% if widget.title %}{{ widget.title }}{% else %}Widget{% endif %}</h1>
+  
+  <form class="pure-form" action="/clients/{{ client.key.id() }}/widget-update/{{ widget.key.id() }}" method="post">
+    <fieldset>
+      <div class="pure-control-group"><input class="pure-input-2-3" type="text" name="title" placeholder="Title" value="{% if widget.title %}{{ widget.title }}{% endif %}"></div>
+      <div class="pure-control-group"><textarea class="pure-input-2-3" name="text" placeholder="Text">{% if widget.text %}{{ widget.text }}{% endif %}</textarea></div>
+      <div class="pure-control-group"><input class="pure-input-2-3" type="url" name="link" placeholder="Link" value="{% if widget.link %}{{ widget.link }}{% endif %}"></div>
+      <div class="pure-control-group redactor-container"><textarea id="redactor" class="pure-input-2-3" name="embed" placeholder="Embed code">{% if widget.embed %}{{ widget.embed|safe }}{% endif %}</textarea></div>
+      <div class="pure-control-group">Color theme: 
+        <select name="theme">
+           <option value="default">Default</option>
+           <option value="red"{% if widget.theme == "red" %} selected{% endif %}>Red</option>
+           <option value="yellow"{% if widget.theme == "yellow" %} selected{% endif %}>Yellow</option>
+           <option value="green"{% if widget.theme == "green" %} selected{% endif %}>Green</option>
+           <option value="blue"{% if widget.theme == "blue" %} selected{% endif %}>Blue</option>
+         </select>
+      </div>
+      <div class="pure-controls"><button type="submit" class="pure-button pure-button-primary">Update widget</button></div>
+    </fieldset>
+  </form>
+  
+  <form class='pure-form>' action="/clients/{{ client.key.id() }}/widget-update/{{ widget.key.id() }}" method="post">
+    <input type="hidden" name="victim" value="{{ widget.key.id() }}">
+    <div><button type="submit" class="pure-button">Delete widget</button></div>
+  </form>
+  
+{% endblock %}
+
+
+{% block js_footer %}
+  <script src="/js/redactor/redactor.min.js"></script>
+  <script src="/js/redactor/youtube.js"></script
+  <script src="/js/redactor/image.js"></script>
+  <script>
+    $(function() {
+      $('#redactor').redactor({
+        buttonSource: true,
+        plugins: ['youtube','imageUpload'],
+        buttons: ['html', 'bold', 'italic', 'link', 'image', 'youtube'] 
+      });
+    });
+  </script>
+{% endblock %}
+
+

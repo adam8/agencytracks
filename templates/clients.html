@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <h1>{{ client.client_name }} Users</h1>
+  
+  <form class="pure-form" action="/clients/{{ client.key.id() }}/users" method="post">
+    {% for e in client.email %}
+      <div><input class="client-username" type="text" value="{{ e }}"></div>
+    {% endfor %} 
+    <input name="new_user" class="client-username" type="email" placeholder="Google email">
+    <div><button type="submit" class="pure-button pure-button-primary">Save Users to {{ client.client_name }}</button></div>
+  </form>
+  
+{% endblock %}

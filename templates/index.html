@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  
+  <h1>Clients</h1>
+  <ul class="admin-list">
+    {% for client in clients %}
+      <li>
+        <span class="admin-client-name">{{ client.client_name }}</span> 
+        <a class="pure-button" href="/dashboard/{{ client.abbreviation }}">Client</a> <a class="pure-button" href="/clients/{{ client.abbreviation }}">Developer</a>  
+        <form style="display: inline" action="/clients/delete" method="post"><input type="hidden" name="victim" value="{{ client.key.id() }}"> <button class="pure-button admin-delete-client">x</button></form>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <button class="pure-button pure-button-primary toggle-next">Add client</button>   
+  <form class="toggle-this pure-form" action="/clients" method="post">
+    <input type="text" name="client_name" placeholder="Client Name" required>
+    <input style="max-width: 120px" type="text" name="abbreviation" placeholder="Abbreviation" required>
+    <label>Tasks: </label>
+    <select name="project_template">
+        <option value="custom" selected>Custom</option>
+        {% for client in clients %}<option value="{{ client.key.id() }}">{{ client.client_name}}</option>{% endfor %}
+        <option value="10k">$10,000</option>
+        <option value="20k">$20,000</option>
+        <option value="30k">$30,000</option>
+    </select>
+    <button type="submit" class="pure-button pure-button-primary">Create</button>
+  </form>
+  
+  <h1>Project Steps</h2>
+  <button class="pure-button pure-button-primary toggle-next">Manage steps</button>
+  <div class="toggle-this">
+    <ul class="admin-list admin-steps">
+      {% for step in steps %}
+        <li><a href="/steps/{{ step.key.id() }}">{{ step.order }}. {{ step.step_name }} </a>
+          <form style="display: inline" action="/steps/delete" method="post"><input type="hidden" name="victim" value="{{ step.key.id() }}"> <button class="pure-button admin-delete-client">x</button></form>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <button class="pure-button pure-button-primary toggle-next">Add new step</button>
+    <form class="pure-form toggle-this" action="/steps" method="post">
+      <input type="number" name="order" placeholder="Number" style="width:100px" required>
+      <input type="text" name="step_name" placeholder="Step Name" required>
+      <button class="pure-button pure-button-primary" type="submit">Create</button>
+    </form>
+  </div>
+  
+  
+{% endblock %}

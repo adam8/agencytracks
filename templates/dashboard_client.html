@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+  
+  <h1>{{ client.client_name }} Client Dashboard</h1>
+  
+  <button type="submit" class="pure-button trigger-next">Add new box</button>
+  
+  <form class="pure-form toggle-this widget-create-form" action="/clients/{{ client.key.id() }}/widget" method="post">
+    <fieldset>
+      <div class="pure-control-group"><input class="pure-input-2-3" type="text" name="title" placeholder="Title"></div>
+      <div class="pure-control-group"><textarea class="pure-input-2-3" name="text" placeholder="Text"></textarea></div>
+      <div class="pure-control-group"><input class="pure-input-2-3" type="url" name="link" placeholder="link"></div>
+      <div class="pure-control-group"><textarea class="pure-input-2-3" name="embed" placeholder="Embed code"></textarea></div>
+      <div class="pure-control-group">Color theme: 
+        <select name="theme">
+          <option value="default">Default</option>
+          <option value="red">Red</option>
+          <option value="yellow">Yellow</option>
+          <option value="green">Green</option>
+          <option value="blue">Blue</option>
+        </select>
+      </div>
+      <div class="pure-controls">
+        <button type="submit" class="pure-button">Save widget</button> 
+        <a href="#" class="cancel-this">Cancel</a></div>
+    </fieldset>
+  </form>
+  
+  <ul id="columns" class="widget-container">
+    <li id="widget-notes" class="widget-item" data-client="{{ client.key.id() }}" data-user="{{ user }}"></li>
+    <li class="widget-item theme-green theme-colored">
+      <h2 class="balance-text">Video Chat</h2>
+      <div class="widget-text balance-text">Speak directly with a developer at The Level in a video call. (This call is free)</div> 
+      <div><button onclick="window.location=https://mgechev-webrtc.herokuapp.com/" class="pure-button pure-button-primary">Schedule Video Call</button></div>
+    </li>
+    {% for widget in widgets %}
+      {# if widget.key -> better to not check for this, so we're sure we didn't forget to delete widget key referenced in client (when a widget is deleted) #}
+        <li class="widget-item{% if widget.embed %} widget-embed-container{% endif %}{% if widget.theme %} theme-{{ widget.theme}}{% endif %}{% if widget.theme != "default" %} theme-colored{% endif %}" data-widget="{{ widget.key.id() }}">
+          {% if widget.link %}<a href="{{ widget.link }}" class="widget-link" target="_blank">{% endif %}
+            {% if widget.title %}<h2 class="balance-text">{{ widget.title }}</h2>{% endif %}
+            {% if widget.text %}<div class="widget-text balance-text">{{ widget.text|safe }}</div>{% endif %}
+            {% if widget.embed %}<div class="widget-embed">{{ widget.embed|safe }}</div>{% endif %}
+          {% if widget.link %}</a>{% endif %}
+          <div class="widget-edit">
+            <a class="widget-reorder">DRAG</a> 
+            <a href="/clients/{{ client.key.id() }}/widget/{{ widget.key.id() }}">EDIT</a>
+          </div>
+        </li>
+      {# endif #}
+    {% endfor %}
+  </ul>
+  
+{% endblock %}
+
+{% block js_footer %}
+
+  <script>
+    $(function() {
+      
+      // Drag to re-order widgets
+      $('#columns').sortable({ 
+    		distance: 10,
+        nested: false,
+        handle: '.widget-reorder',
+        onDragStart: function ($item, container, _super) {
+        },
+        onDrag: function ($item, position) {
+        },
+        onDrop: function (item, container, _super) {
+          $('#columns').sortable("disable");
+          var out = [];
+          function processOneLi(node) {    
+            var retVal = {
+              "id": node.data('widget'),
+              "order": node.index()
+            };
+            return retVal;
+          }
+          $('#columns').children("li").each(function() {
+              out.push(processOneLi($(this)));
+          });
+          var orderJSON = JSON.stringify(out);
+          console.log(orderJSON);
+          $('#columns').addClass('tasks-updating');
+          $.post( "/clients/{{ client.key.id() }}/widget/order", {"order": orderJSON}).done(function(data) {
+            console.log(data);
+            $('#columns').sortable("enable");
+            $('#columns').removeClass('tasks-updating');
+          });
+        },
+        afterMove: function (placeholder, container) {
+        }
+    	});
+      
+    });
+  </script>
+
+{% endblock %}
